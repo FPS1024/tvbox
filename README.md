@@ -22,7 +22,7 @@ pip3 install -r requirements.txt
 在 `api-key.txt` 文件中写入接口地址（每行一个）：
 
 ```
-http://v.esirtv.top/api/index.php?sign=005590aba3842cdc
+http://v.esirtv.top/api/index.php?sign=xxxxxxxxxxxxxxxx
 ```
 
 ### 2. 解析主接口配置
@@ -84,7 +84,7 @@ python3 fetch_play_urls.py
 ```
 从 api-key.txt 读取接口地址: http://v.esirtv.top/api/index.php?sign=xxxxxxxxxxxxxxxx
 
-正在解析接口: http://v.esirtv.top/api/index.php?sign=005590aba3842cdc
+正在解析接口: http://v.esirtv.top/api/index.php?sign=xxxxxxxxxxxxxxxx
 --------------------------------------------------------------------------------
 响应状态码: 200
 Content-Type: application/json
