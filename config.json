@@ -1,0 +1,9 @@
+{
+  "api_url": "",
+  "delay_min": 0.5,
+  "delay_max": 2.0,
+  "timeout": 15,
+  "default_player": "mpv",
+  "max_results": 20
+}
+
