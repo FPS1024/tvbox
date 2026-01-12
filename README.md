@@ -45,7 +45,7 @@ python3 parse_sites.py
 - 读取 `tvbox_config.json` 中的站点列表
 - 使用相同的请求头访问每个站点的 API
 - 将每个站点的配置保存到 `sites/` 文件夹
-- 按照站点名称命名文件（如 `ئەسىر19.json`、`ئەسىر20.json`）
+- 按照站点名称命名文件（如 `11.json`、`12.json`）
 
 **注意**: 脚本会在每个请求之间延迟 0.5 秒，避免请求过快。
 
@@ -82,7 +82,7 @@ python3 fetch_play_urls.py
 ## 输出示例
 
 ```
-从 api-key.txt 读取接口地址: http://v.esirtv.top/api/index.php?sign=005590aba3842cdc
+从 api-key.txt 读取接口地址: http://v.esirtv.top/api/index.php?sign=xxxxxxxxxxxxxxxx
 
 正在解析接口: http://v.esirtv.top/api/index.php?sign=005590aba3842cdc
 --------------------------------------------------------------------------------
