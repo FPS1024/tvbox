@@ -1,0 +1,30 @@
+/* 本地字体引入（关键） */
+@font-face {
+    font-family: "TheUyghurFont";
+    src: url("../fonts/ALKATIP.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* 全站使用该字体 */
+body {
+    font-family: "MyFont", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background-color: #0f172a;
+    color: #ffffff;
+}
+
+/* Vue v-cloak */
+[v-cloak] {
+    display: none;
+}
+
+/* 卡片悬停效果 */
+.poster-card:hover .play-overlay {
+    opacity: 1;
+}
+
+/* 毛玻璃效果 */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+}
