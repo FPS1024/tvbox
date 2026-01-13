@@ -3,3 +3,5 @@ sites/
 tvbox_config.json
 api-key.txt
 
+/node/node_modules
+
