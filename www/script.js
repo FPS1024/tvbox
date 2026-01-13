@@ -11,7 +11,7 @@ createApp({
             movies: [                           
                 {
                     id: 1,
-                    title: '星际穿越',
+                    title:  '星际穿越',
                     type: '电影',
                     category: '科幻 / 冒险',
                     score: 9.4,

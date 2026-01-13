@@ -1,14 +1,15 @@
 /* 本地字体引入（关键） */
 @font-face {
-    font-family: "TheUyghurFont";
-    src: url("../fonts/ALKATIP.ttf") format("truetype");
+    font-family: "ALKATIP";
+    src: url("../fonts/ALKATIP Kitab Tom.ttf") format("truetype");
+    font-size: large;
     font-weight: normal;
     font-style: normal;
 }
 
 /* 全站使用该字体 */
 body {
-    font-family: "TheUyghurFont", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: "ALKATIP", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     background-color: #0f172a;
     color: #ffffff;
 }
