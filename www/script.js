@@ -8,7 +8,7 @@ createApp({
             selectedEpisode: '第1集',
             quality: '1080P 高清',
             activeMovie: null,
-            movies: [
+            movies: [                           
                 {
                     id: 1,
                     title: '星际穿越',
@@ -53,6 +53,10 @@ createApp({
         filterType(type) {
             this.currentType = type;
             this.view = 'home';
-        }
+        },
+        toggleFavorite(id) { // 收藏按钮逻辑
+                    const movie = this.movies.find(m => m.id === id);
+                    movie.isFav = !movie.isFav;
+                }
     }
 }).mount('#app');
