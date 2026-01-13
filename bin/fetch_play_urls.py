@@ -13,6 +13,10 @@ import sys
 import time
 from urllib.parse import urlparse, parse_qs, urlencode
 
+# 获取项目根目录（bin 目录的父目录）
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+
 def get_tvbox_headers():
     """
     获取 TVBox 专用请求头，与 parse_api.py 保持一致
@@ -35,9 +39,10 @@ def get_site_api_url(site_file):
     Returns:
         str: API URL，如果找不到返回 None
     """
-    # 读取主配置文件
+    # 读取主配置文件（从项目根目录）
+    config_file = os.path.join(PROJECT_ROOT, 'tvbox_config.json')
     try:
-        with open('tvbox_config.json', 'r', encoding='utf-8') as f:
+        with open(config_file, 'r', encoding='utf-8') as f:
             config = json.load(f)
         
         sites = config.get('sites', [])
@@ -97,12 +102,16 @@ def update_site_with_play_urls(site_file, site_dir='sites', delay=4.0):
     
     Args:
         site_file: 站点 JSON 文件名
-        site_dir: 站点文件夹路径
+        site_dir: 站点文件夹路径（相对于项目根目录）
         delay: 请求之间的延迟（秒）
         
     Returns:
         tuple: (成功数量, 失败数量, 总数)
     """
+    # 如果 site_dir 不是绝对路径，则相对于项目根目录
+    if not os.path.isabs(site_dir):
+        site_dir = os.path.join(PROJECT_ROOT, site_dir)
+    
     filepath = os.path.join(site_dir, site_file)
     
     if not os.path.exists(filepath):
@@ -204,7 +213,8 @@ def main():
     print("TVBox 播放链接获取工具")
     print("=" * 80)
     
-    site_dir = 'sites'
+    # 站点目录（项目根目录下的 sites 目录）
+    site_dir = os.path.join(PROJECT_ROOT, 'sites')
     
     if not os.path.exists(site_dir):
         print(f"❌ 错误: 未找到 {site_dir} 文件夹")
@@ -227,7 +237,7 @@ def main():
     
     # 处理每个站点
     for site_file in site_files:
-        success, fail, total = update_site_with_play_urls(site_file, site_dir, delay=4.0)
+        success, fail, total = update_site_with_play_urls(site_file, 'sites', delay=4.0)
         total_success += success
         total_fail += fail
         total_videos += total

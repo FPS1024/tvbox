@@ -11,6 +11,10 @@ import json
 import sys
 import os
 
+# 获取项目根目录（bin 目录的父目录）
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+
 def parse_tvbox_api(api_url):
     """
     解析 TVBox 接口，获取配置 JSON
@@ -92,8 +96,12 @@ def save_config(config, output_file='tvbox_config.json'):
     
     Args:
         config: 配置字典
-        output_file: 输出文件名
+        output_file: 输出文件路径（相对于项目根目录）
     """
+    # 如果 output_file 不是绝对路径，则相对于项目根目录
+    if not os.path.isabs(output_file):
+        output_file = os.path.join(PROJECT_ROOT, output_file)
+    
     try:
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(config, f, ensure_ascii=False, indent=2)
@@ -106,8 +114,8 @@ def save_config(config, output_file='tvbox_config.json'):
 
 def main():
     """主函数"""
-    # 读取 API 地址
-    api_key_file = 'api-key.txt'
+    # 读取 API 地址（从项目根目录）
+    api_key_file = os.path.join(PROJECT_ROOT, 'api-key.txt')
     
     if not os.path.exists(api_key_file):
         print(f"❌ 错误: 未找到 {api_key_file} 文件")

@@ -13,6 +13,10 @@ import sys
 import time
 from urllib.parse import quote
 
+# 获取项目根目录（bin 目录的父目录）
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+
 def get_tvbox_headers():
     """
     获取 TVBox 专用请求头，与 parse_api.py 保持一致
@@ -101,11 +105,15 @@ def save_site_config(config, filename, output_dir='sites'):
     Args:
         config: 站点配置字典
         filename: 文件名（不含扩展名）
-        output_dir: 输出目录
+        output_dir: 输出目录（相对于项目根目录）
         
     Returns:
         bool: 成功返回 True
     """
+    # 如果 output_dir 不是绝对路径，则相对于项目根目录
+    if not os.path.isabs(output_dir):
+        output_dir = os.path.join(PROJECT_ROOT, output_dir)
+    
     # 确保输出目录存在
     os.makedirs(output_dir, exist_ok=True)
     
@@ -127,13 +135,17 @@ def parse_all_sites(config_file='tvbox_config.json', output_dir='sites', delay=0
     解析所有站点配置
     
     Args:
-        config_file: TVBox 配置文件路径
-        output_dir: 输出目录
+        config_file: TVBox 配置文件路径（相对于项目根目录）
+        output_dir: 输出目录（相对于项目根目录）
         delay: 请求之间的延迟（秒），避免请求过快
         
     Returns:
         tuple: (成功数量, 失败数量, 总数)
     """
+    # 如果 config_file 不是绝对路径，则相对于项目根目录
+    if not os.path.isabs(config_file):
+        config_file = os.path.join(PROJECT_ROOT, config_file)
+    
     # 读取配置文件
     if not os.path.exists(config_file):
         print(f"❌ 错误: 未找到 {config_file} 文件")
@@ -204,10 +216,10 @@ def main():
     print("TVBox 站点配置解析工具")
     print("=" * 80)
     
-    # 解析所有站点
+    # 解析所有站点（从项目根目录读取配置，保存到项目根目录下的 sites 目录）
     success, fail, total = parse_all_sites(
-        config_file='tvbox_config.json',
-        output_dir='sites',
+        config_file='tvbox_config.json',  # 相对于项目根目录
+        output_dir='sites',  # 相对于项目根目录
         delay=0.5  # 每个请求之间延迟 0.5 秒
     )
     
@@ -221,7 +233,8 @@ def main():
     print("=" * 80)
     
     if success > 0:
-        print(f"\n✅ 所有站点配置已保存到 sites/ 目录")
+        sites_dir = os.path.join(PROJECT_ROOT, 'sites')
+        print(f"\n✅ 所有站点配置已保存到 {sites_dir}/ 目录")
         sys.exit(0)
     else:
         print("\n❌ 没有成功解析任何站点")
