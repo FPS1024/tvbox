@@ -27,15 +27,19 @@
             <div class="flex items-center space-x-8">
                 <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent cursor-pointer"
                     @click="view = 'home'">
-                    EsirTV 
+                    EsirTV
                 </h1>
+
+                <!-- 影视类别 -->
+
                 <div class="hidden md:flex space-x-6 text-slate-300">
-                    <a href="#" @click="filterType('全部')" :class="{'text-blue-400': currentType==='全部'}">首页</a>
-                    <a href="#" @click="filterType('电影')" :class="{'text-blue-400': currentType==='电影'}">电影</a>
-                    <a href="#" @click="filterType('电视剧')" :class="{'text-blue-400': currentType==='电视剧'}">电视剧</a>
-                    <a href="#" @click="filterType('动画')" :class="{'text-blue-400': currentType==='动画'}">动画</a>
+                    <a href="#" @click="filterType(0)" :class="{'text-blue-400': currentType===0}">全部</a>
+                    <a href="#" @click="filterType(type.type_id)" v-for="type in types" :key="type.type_id" :class="{'text-blue-400': currentType===type.type_id}">{{ type.type_name }}</a>
                 </div>
             </div>
+
+                <!-- 搜索框 -->
+
             <div class="flex items-center space-x-4">
                 <div class="relative">
                     <input type="text" placeholder="搜索电影..."
@@ -45,37 +49,43 @@
             </div>
         </nav>
 
-        <main v-if="view === 'home'" class="p-6">
-            <div class="flex items-center justify-between mb-8">
-                <h2 class="text-2xl font-semibold">{{ currentType }}精选</h2>
-            </div>
+        <!-- 首页视图 -->
 
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                <div v-for="item in filteredMovies" :key="item.id" @click="showDetail(item)"
-                    class="poster-card relative group cursor-pointer rounded-xl overflow-hidden transition-transform duration-300 hover:scale-105 shadow-lg">
-                    <img :src="item.poster" class="w-full h-72 object-cover">
-                    <div
-                        class="play-overlay absolute inset-0 bg-black/60 opacity-0 transition-opacity flex flex-col justify-end p-4">
-                        <div class="mb-2 text-yellow-400 text-sm"><i class="fa-solid fa-star"></i> {{ item.score }}
+        <main v-if="view === 'home'" class="p-6">
+                        <div class="flex items-center justify-between mb-8">
+                                <h2 class="text-2xl font-semibold">
+                                    <span v-if="currentType === 0">全部精选</span>
+                                    <span v-else>{{ types.find(t => t.type_id === currentType)?.type_name || '' }} 精选</span>
+                                </h2>
                         </div>
-                        <p class="text-xs text-slate-300 line-clamp-2">{{ item.desc }}</p>
-                    </div>
-                    <div class="bg-slate-800 p-3">
-                        <h3 class="font-medium truncate">{{ item.title }}</h3>
-                        <p class="text-xs text-slate-400 mt-1">{{ item.region }} · {{ item.category }}</p>
+
+            <!-- 海报区：一行6个，全部从配置文件动态获取 -->
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                <div v-for="item in filteredMovies" :key="item.id" @click="showDetail(item)"
+                    class="poster-card flex flex-col items-center cursor-pointer rounded-xl overflow-hidden transition-transform duration-300 hover:scale-105 shadow-lg">
+                    <img :src="item.poster" class="w-full h-64 object-cover" :alt="item.title">
+                    <div class="bg-slate-800 h-12 flex items-center justify-center w-full rounded-b-xl">
+                        <h3 class="font-medium truncate text-center w-full">{{ item.title }}</h3>
                     </div>
                 </div>
             </div>
         </main>
 
+
+
+
+        
         <!-- 详情页面视图 -->
 
         <main v-if="view === 'detail'" class="min-h-screen">
             <div class="bg-black w-full aspect-video md:h-[60vh] relative">
-                <div class="absolute inset-0 flex items-center justify-center bg-slate-900">
-                    <i class="fa-solid fa-circle-play text-6xl text-blue-500 opacity-80"></i>
-                    <p class="absolute bottom-10 text-slate-400">正在播放：{{ activeMovie.title }} - {{ selectedEpisode }}
-                    </p>
+                <div class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900">
+                    <button v-if="!isPlaying" @click="playVideo" class="flex flex-col items-center justify-center focus:outline-none">
+                        <i class="fa-solid fa-circle-play text-6xl text-blue-500 opacity-80"></i>
+                        <span class="mt-2 text-slate-300">点击播放</span>
+                    </button>
+                    <video v-else ref="player" :src="currentPlayUrl" controls autoplay class="w-full h-full max-h-[60vh] rounded-xl bg-black"></video>
+                    <p class="absolute bottom-10 text-slate-400">正在播放：{{ activeMovie.title }} - {{ selectedEpisode }}</p>
                 </div>
                 <button @click="view = 'home'"
                     class="absolute top-6 left-6 bg-black/50 p-2 rounded-full hover:bg-black">

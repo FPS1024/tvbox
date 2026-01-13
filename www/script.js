@@ -4,59 +4,116 @@ createApp({
     data() {
         return {
             view: 'home',
-            currentType: '全部',
+            types: [], // 分类按钮
+            currentType: 0, // 当前type_id，默认0为全部
             selectedEpisode: '第1集',
             quality: '1080P 高清',
             activeMovie: null,
-            movies: [                           
-                {
-                    id: 1,
-                    title:  '星际穿越',
-                    type: '电影',
-                    category: '科幻 / 冒险',
-                    score: 9.4,
-                    region: '美国',
-                    year: 2014,
-                    poster: 'https://mmecoa.qpic.cn/mmecoa_jpg/nPVOKiaianVyO6Rt6tzPflEZcnPUB56r0Om3aSqkx0BF2ic9dFl4C28p2S0aObfy0X1L85hoRSCoZ0ia4sNb2vbtlA/0?wx_fmt=jpeg',
-                    desc: '一组探险者利用虫洞进行星际航行。',
-                    isFav: false,
-                    episodes: 1
-                },
-                {
-                    id: 2,
-                    title: '权力的游戏',
-                    type: '电视剧',
-                    category: '剧情 / 奇幻',
-                    score: 9.3,
-                    region: '美国',
-                    year: 2011,
-                    poster: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23',
-                    desc: '维斯特洛大陆的权力斗争。',
-                    isFav: false,
-                    episodes: 10
-                }
-            ]
+            movies: [], // 当前type下的视频
+            site: null, // 当前站点名
+            isPlaying: false, // 是否正在播放
+            currentPlayUrl: '' // 当前播放url
         };
     },
     computed: {
         filteredMovies() {
-            if (this.currentType === '全部') return this.movies;
-            return this.movies.filter(m => m.type === this.currentType);
+            return this.movies;
         }
     },
     methods: {
         showDetail(movie) {
             this.activeMovie = movie;
+            this.selectedEpisode = '第1集';
+            this.isPlaying = false;
+            this.currentPlayUrl = '';
             this.view = 'detail';
             window.scrollTo(0, 0);
         },
-        filterType(type) {
-            this.currentType = type;
+        filterType(type_id) {
+            this.currentType = type_id;
             this.view = 'home';
+            this.fetchMovies();
         },
-        toggleFavorite(id) { // 收藏按钮逻辑
-                    const movie = this.movies.find(m => m.id === id);
-                    movie.isFav = !movie.isFav;
+        toggleFavorite(id) {
+            const movie = this.movies.find(m => m.id === id);
+            if (movie) movie.isFav = !movie.isFav;
+        },
+        async fetchSite() {
+            const res = await fetch('http://localhost:3000/api/site');
+            const data = await res.json();
+            this.site = data.site;
+        },
+        async fetchTypes() {
+            const res = await fetch(`http://localhost:3000/api/types?site=${this.site}`);
+            const data = await res.json();
+            this.types = data;
+            // 默认currentType为0（全部）
+        },
+        async fetchMovies() {
+            if (!this.site || this.currentType === null) return;
+            const res = await fetch(`http://localhost:3000/api/list?site=${this.site}&type_id=${this.currentType}`);
+            const data = await res.json();
+            // 兼容收藏状态
+            this.movies = data.map(item => {
+                // 只取#后面的内容（正片），广告全部忽略
+                let episodes = 1;
+                let playUrls = [];
+                if (item.vod_play_url) {
+                    const hashIdx = item.vod_play_url.indexOf('#');
+                    let realStr = hashIdx >= 0 ? item.vod_play_url.slice(hashIdx + 1) : item.vod_play_url;
+                    // 可能有多集
+                    playUrls = realStr.split('#').map(seg => {
+                        const parts = seg.split('$');
+                        return parts[1] && parts[1].trim().startsWith('http') ? parts[1].trim() : null;
+                    }).filter(Boolean);
+                    episodes = playUrls.length;
                 }
-    }
+                return {
+                    ...item,
+                    id: item.vod_id,
+                    title: item.vod_name,
+                    poster: item.vod_pic,
+                    desc: item.vod_content,
+                    isFav: false,
+                    episodes,
+                    playUrls
+                };
+            });
+        },
+        // 获取当前选中的剧集url
+        getCurrentPlayUrl() {
+            if (!this.activeMovie || !this.activeMovie.playUrls) return '';
+            // 选集如“第1集”
+            const idx = parseInt(this.selectedEpisode.replace(/[^\d]/g, '')) - 1;
+            return this.activeMovie.playUrls[idx] || '';
+        },
+        playVideo() {
+            this.currentPlayUrl = this.getCurrentPlayUrl();
+            this.isPlaying = true;
+            this.$nextTick(() => {
+                if (this.$refs.player) {
+                    this.$refs.player.play();
+                }
+            });
+        }
+    },
+        async mounted() {
+            await this.fetchSite();
+            await this.fetchTypes();
+            await this.fetchMovies();
+        },
+        // 选集切换时自动切换播放
+        watch: {
+            selectedEpisode() {
+                if (this.isPlaying) {
+                    this.currentPlayUrl = this.getCurrentPlayUrl();
+                    this.$nextTick(() => {
+                        if (this.$refs.player) {
+                            this.$refs.player.load();
+                            this.$refs.player.play();
+                        }
+                    });
+                }
+            }
+        }
 }).mount('#app');
