@@ -54,38 +54,41 @@ createApp({
             const res = await fetch(`http://localhost:3000/api/list?site=${this.site}&type_id=${this.currentType}`);
             const data = await res.json();
             // 兼容收藏状态
-            this.movies = data.map(item => {
-                // 只取#后面的内容（正片），广告全部忽略
-                let episodes = 1;
-                let playUrls = [];
-                if (item.vod_play_url) {
-                    const hashIdx = item.vod_play_url.indexOf('#');
-                    let realStr = hashIdx >= 0 ? item.vod_play_url.slice(hashIdx + 1) : item.vod_play_url;
-                    // 可能有多集
-                    playUrls = realStr.split('#').map(seg => {
-                        const parts = seg.split('$');
-                        return parts[1] && parts[1].trim().startsWith('http') ? parts[1].trim() : null;
-                    }).filter(Boolean);
-                    episodes = playUrls.length;
-                }
-                return {
-                    ...item,
-                    id: item.vod_id,
-                    title: item.vod_name,
-                    poster: item.vod_pic,
-                    desc: item.vod_content,
-                    isFav: false,
-                    episodes,
-                    playUrls
-                };
-            });
+                this.movies = data.map(item => {
+                    // 解析剧集名和链接
+                    let episodeList = [];
+                    if (item.vod_play_url) {
+                        // 按#分割，每段为一集
+                        const rawEpisodes = item.vod_play_url.split('#');
+                        rawEpisodes.forEach(raw => {
+                            const segs = raw.split('$');
+                            if (segs.length === 2 && segs[1].trim().startsWith('http')) {
+                                // segs[0]为剧集名，segs[1]为链接
+                                episodeList.push({
+                                    name: segs[0].trim(),
+                                    url: segs[1].trim()
+                                });
+                            }
+                        });
+                    }
+                    return {
+                        ...item,
+                        id: item.vod_id,
+                        title: item.vod_name,
+                        poster: item.vod_pic,
+                        desc: item.vod_content,
+                        isFav: false,
+                        episodes: episodeList.length,
+                        episodeList
+                    };
+                });
         },
         // 获取当前选中的剧集url
+        // 获取当前选中的剧集url
         getCurrentPlayUrl() {
-            if (!this.activeMovie || !this.activeMovie.playUrls) return '';
-            // 选集如“第1集”
-            const idx = parseInt(this.selectedEpisode.replace(/[^\d]/g, '')) - 1;
-            return this.activeMovie.playUrls[idx] || '';
+            if (!this.activeMovie || !this.activeMovie.episodeList) return '';
+            const idx = this.activeMovie.episodeList.findIndex(ep => ep.name === this.selectedEpisode);
+            return idx >= 0 ? this.activeMovie.episodeList[idx].url : '';
         },
         playVideo() {
             this.currentPlayUrl = this.getCurrentPlayUrl();

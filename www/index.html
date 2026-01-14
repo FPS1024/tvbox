@@ -123,10 +123,10 @@
                     <div v-if="activeMovie.type !== '电影'" class="mb-8">
                         <h4 class="text-lg font-semibold mb-4">选集播放</h4>
                         <div class="flex flex-wrap gap-3">
-                            <button v-for="n in activeMovie.episodes" :key="n" @click="selectedEpisode = '第' + n + '集'"
-                                :class="selectedEpisode === '第'+n+'集' ? 'bg-blue-600 border-blue-600' : 'bg-slate-800 border-slate-700'"
-                                class="px-5 py-2 border rounded-md hover:border-blue-500 transition">
-                                {{ n }}
+                            <button v-for="ep in activeMovie.episodeList" :key="ep.name" @click="selectedEpisode = ep.name"
+                                :class="selectedEpisode === ep.name ? 'bg-blue-600 border-blue-600 text-lg' : 'bg-slate-800 border-slate-700 text-lg'"
+                                class="px-8 py-3 border rounded-md hover:border-blue-500 transition font-bold">
+                                {{ ep.name }}
                             </button>
                         </div>
                     </div>
